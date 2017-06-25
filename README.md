@@ -2,6 +2,8 @@
 
 Dependency Injection UMD Module using the Built-in Proxy.
 
+[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![codecov][codecov-image]][codecov-url]
+
 ## Installation
 
 ```bash
@@ -151,6 +153,15 @@ On the bright side, this means that you can re-use a created injector and be sur
 
 Available under the MIT License
 (c) 2017 Patrick Roberts
+
+[npm-url]: https://www.npmjs.com/package/di-proxy
+[npm-image]: https://img.shields.io/npm/v/di-proxy.svg
+
+[travis-url]: https://travis-ci.org/gulpjs/di-proxy
+[travis-image]: https://travis-ci.org/patrickroberts/di-proxy.svg?branch=master
+
+[codecov-url]: https://codecov.io/gh/patrickroberts/di-proxy
+[codecov-image]: https://codecov.io/gh/patrickroberts/di-proxy/branch/master/graph/badge.svg
 
 [proxy]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
 [memoize]: https://en.wikipedia.org/wiki/Memoization
