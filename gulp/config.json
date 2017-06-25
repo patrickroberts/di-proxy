@@ -1,0 +1,12 @@
+{
+  "paths": {
+    "lib": {
+      "src": "es6/index.js",
+      "dst": "umd"
+    }
+  },
+  "names": {
+    "lib": "di-proxy.min.js",
+    "glob": "createInjector"
+  }
+}

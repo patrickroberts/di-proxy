@@ -1,0 +1,49 @@
+{
+  "name": "di-proxy",
+  "version": "1.0.0",
+  "description": "Dependency Injection UMD Module using the Built-in Proxy.",
+  "main": "umd/di-proxy.min.js",
+  "scripts": {
+    "prepublishOnly": "gulp && npm test",
+    "build": "gulp",
+    "test": "standard && node ./node_modules/.bin/isparta cover _mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patrickroberts/di-proxy.git"
+  },
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=4.0.0"
+  },
+  "keywords": [
+    "di",
+    "dependency",
+    "injection",
+    "injector",
+    "proxy"
+  ],
+  "author": "Patrick Roberts",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/patrickroberts/di-proxy/issues"
+  },
+  "homepage": "https://github.com/patrickroberts/di-proxy#readme",
+  "devDependencies": {
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-rename-umd-globals": "^1.0.0",
+    "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
+    "chai": "^4.0.2",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-uglify": "^3.0.0",
+    "gulp-util": "^3.0.8",
+    "isparta": "^4.0.0",
+    "mocha": "^3.4.2",
+    "require-dir": "^0.3.2",
+    "standard": "^10.0.2"
+  }
+}
