@@ -157,7 +157,7 @@ Available under the MIT License
 [npm-url]: https://www.npmjs.com/package/di-proxy
 [npm-image]: https://img.shields.io/npm/v/di-proxy.svg
 
-[travis-url]: https://travis-ci.org/gulpjs/di-proxy
+[travis-url]: https://travis-ci.org/patrickroberts/di-proxy
 [travis-image]: https://travis-ci.org/patrickroberts/di-proxy.svg?branch=master
 
 [codecov-url]: https://codecov.io/gh/patrickroberts/di-proxy
