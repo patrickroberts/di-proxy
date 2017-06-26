@@ -1,6 +1,6 @@
 {
   "name": "di-proxy",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Dependency Injection UMD Module using the Built-in Proxy.",
   "main": "umd/di-proxy.min.js",
   "scripts": {

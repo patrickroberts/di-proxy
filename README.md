@@ -33,7 +33,7 @@ const createInjector = require('di-proxy')
 // pass dependency resolver to injector factory
 const inject = createInjector(require)
 // wrap IIFE with dependency injector
-inject(({ http, express, 'socket-io': sio }) => {
+inject(({ http, express, 'socket.io': sio }) => {
   const app = express()
   const server = http.Server(app)
   const io = sio(server)
@@ -49,21 +49,40 @@ inject(({ http, express, 'socket-io': sio }) => {
 
 I'm glad you asked. Here's some other interesting design patterns (using somewhat contrived examples) you can accomplish with this:
 
-`jQuery`:
+[`jQuery`][jquery-demo]:
 
 ```js
-const $inject = createInjector(jQuery)
+const $inject = window.createInjector(jQuery)
 
 // IIFE
 $inject(({
   'input#file-input': $file,
   'ul#preview-names': $previewNames
 }) => {
-  $previewNames.empty()
-  const files = $file.prop('files')
-  for (const file of files) {
-    $previewNames.append(`<li>${file.name}</li>`)
-  }
+  $file.change(() => {
+    $previewNames.empty()
+    const files = $file.prop('files')
+    for (const file of files) {
+      $previewNames.append($('<li/>').text(file.name))
+    }
+  })
+})()
+```
+
+[`document.querySelector`][query-selector-demo]:
+
+```js
+const injectQS = window.createInjector(
+  document.querySelector.bind(document)
+)
+
+// get some properties and attributes of an <input>
+injectQS(({ input: { id, name, type, value }, pre }) => {
+  const formattedText = `id: ${id}
+name: ${name}
+type: ${type}
+value: ${value}`
+  pre.appendChild(document.createTextNode(formattedText))
 })()
 ```
 
@@ -83,41 +102,11 @@ injectRead(({
 })()
 ```
 
-`document.querySelector`:
-
-```js
-const injectQS = createInjector(
-  document.querySelector.bind(document)
-)
-
-// get some properties and attributes of an <input>
-injectQS(({ input: { name, type, value } }) => {
-  console.log(name, type, value)
-})()
-```
-
-`async / await`:
-
-```js
-const injectBlobPromises = createInjector(async function (prop) {
-  let response = await fetch(prop)
-  let blob = await response.blob()
-  return URL.createObjectURL(blob)
-})
-
-injectBlobPromises(async function (getBlobURLs, ...urls) {
-  let blobURLs = await Promise.all(
-    urls.map((url) => getBlobURLs[url])
-  )
-  console.log(blobURLs)
-})('some.pdf', 'urls.jpg')
-```
-
 ## Dependencies and Supported Environments
 
-This assumes that the environment it's running in has a working implementation for [`Proxy`][proxy] and [`WeakMap`][weakmap]. The latter of the two is used to reduce memory consumption of memoization.
+This assumes that the environment it's running in has a working implementation for [`Proxy`][proxy] and [`WeakMap`][weakmap], which is used to reduce memory consumption of memoization.
 
-This means that all modern browsers, including Microsoft Edge, and Node.js `>= 6.0.0` are supported, according to [caniuse.com][caniuse] and [kangax/compat-table][compat-table].
+This means that all modern browsers, including Microsoft Edge, and Node.js `>=6.0.0` are supported, according to [caniuse.com][caniuse] and [kangax/compat-table][compat-table].
 
 ## Some Notes on Performance
 
@@ -159,6 +148,9 @@ Available under the MIT License
 
 [codecov-url]: https://codecov.io/gh/patrickroberts/di-proxy
 [codecov-image]: https://codecov.io/gh/patrickroberts/di-proxy/branch/master/graph/badge.svg
+
+[jquery-demo]: https://jsfiddle.net/patrob10114/zhdj6jgb/
+[query-selector-demo]: https://jsfiddle.net/patrob10114/jbu5tm1j/
 
 [proxy]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
 [memoize]: https://en.wikipedia.org/wiki/Memoization
