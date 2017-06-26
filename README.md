@@ -32,16 +32,13 @@ const createInjector = require('di-proxy')
 ```js
 // pass dependency resolver to injector factory
 const inject = createInjector(require)
-// wrap function with dependency injector
-const myFunctionWithInjectedDeps = inject(function (deps, config) {
-  const { http, express, 'socket-io': sio } = deps
+// wrap IIFE with dependency injector
+inject(({ http, express, 'socket-io': sio }) => {
   const app = express()
   const server = http.Server(app)
   const io = sio(server)
   // ...
-})
-// execute function and pass other parameters here
-myFunctionWithInjectedDeps(require('./config.json'))
+})()
 ```
 
 ### Wait, what just happened?
@@ -94,7 +91,7 @@ const injectQS = createInjector(
 )
 
 // get some properties and attributes of an <input>
-injectQS(function ({ input: { name, type, value } }) => {
+injectQS(({ input: { name, type, value } }) => {
   console.log(name, type, value)
 })()
 ```
