@@ -165,9 +165,9 @@ stringInject((proxy) => {
 })()
 ```
 
-Because of this, you should be careful when using this in coordination with a query function for live data (like `jQuery`, for example), as it will memoize the injector with the result of the first call unless you `delete` the property name from the `proxy` object before each subsequent call. In a future update, I will probably add an optional argument to disable memoization per injector function once I figure out how best to do that.
+Because of this, you should be careful when using this in coordination with a query function for live data (like `jQuery`, for example), as it will memoize the injector with the result of the first call unless you `delete` the property name from the `proxy` object before each subsequent call, or set the optional `noCache` parameter to `true`.
 
-On the bright side, this means that you can re-use a created injector and be sure that you won't take a performance hit when injecting the same dependency repeatedly, even across multiple functions wrapped by the same injector.
+This means that you can re-use a created injector and be sure that you won't take a performance hit when injecting the same dependency repeatedly, even across multiple functions wrapped by the same injector, or if you need each invocation to re-evaluate live data in the case that your dependencies are non-static, you have that option as well.
 
 ## License
 
