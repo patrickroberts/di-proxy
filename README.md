@@ -2,7 +2,7 @@
 
 Dependency Injection UMD Module using the Built-in Proxy.
 
-[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![codecov][codecov-image]][codecov-url]
+[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![codecov][codecov-image]][codecov-url] [![Standard][code-style-image]][code-style-url]
 
 ## Installation
 
@@ -26,6 +26,36 @@ const createInjector = require('di-proxy')
   var createInjector = window.createInjector
 </script>
 ```
+
+## Documentation
+
+```js
+/**
+ * Returns dependency injection function
+ * @function
+ * @param {Function} resolver
+ * @param {Boolean} [noCache = false]
+ * @returns {Function} inject
+ */
+function createInjector(resolver[, noCache = false])
+```
+
+* `{Function} resolver` accepts a single argument `{String} propertyName` from a trapped property accessor and returns the dependency with that key.
+*  `{Boolean} noCache` determines whether to disable memoization of the `resolver` and each `propertyName` resolved.
+  Defaults to `false`.
+*  `{Function} inject` accepts a single argument `callbackfn` and returns `{Function} injected` which invokes `callbackfn` with a `{Proxy} proxy` bound to the first argument.
+
+```js
+/**
+ * Dependency-injected function
+ * @callback
+ * @param {Proxy} proxy
+ */
+function injected(proxy)
+```
+
+* `{Proxy} proxy` traps property accessors and invokes `resolver` each time with the `propertyName` accessed.
+  If `noCache` is `false` or `undefined`, `proxy` will memoize each property accessor by defining a true property with the key `propertyName` and the value returned by `resolver`.
 
 ## Usage
 
@@ -52,7 +82,7 @@ I'm glad you asked. Here's some other interesting design patterns (using somewha
 [`jQuery`][jquery-demo]:
 
 ```js
-const $inject = window.createInjector(jQuery)
+const $inject = window.createInjector(jQuery, true)
 
 // IIFE
 $inject(({
@@ -73,7 +103,8 @@ $inject(({
 
 ```js
 const injectQS = window.createInjector(
-  document.querySelector.bind(document)
+  document.querySelector.bind(document),
+  true
 )
 
 // get some properties and attributes of an <input>
@@ -86,19 +117,22 @@ value: ${value}`
 })()
 ```
 
-`fs.readFileSync`:
+[`sessionStorage.getItem`][session-storage-demo]:
 
 ```js
-const injectRead = createInjector((path) => {
-  return fs.readFileSync(__dirname + '/' + path)
-})
+const injectLS = window.createInjector(
+  sessionStorage.getItem.bind(sessionStorage),
+  true
+)
 
-injectRead(({
-  'some-file.txt': someFile,
-  'another-file.md': anotherFile
-}) => {
-  console.log(someFile.toString('utf8'))
-  console.log(anotherFile.toString('utf8'))
+sessionStorage.setItem('test', 'value')
+sessionStorage.setItem('another', 'thing')
+
+// get some session properties
+injectLS(({ test, another }) => {
+  const formattedText = `test: ${test}, another: ${another}`
+
+  document.getElementById('out').textContent = formattedText
 })()
 ```
 
@@ -110,7 +144,7 @@ This means that all modern browsers, including Microsoft Edge, and Node.js `>=6.
 
 ## Some Notes on Performance
 
-Internally this dependency injection uses [`Proxy`][proxy], which some may frown upon due to the overhead of invoking meta traps. However, I have taken note of this and wrote the library to balance convenience with performance by [_memoizing_][memoize] each property accessor. Not sure what I mean? Here's an example:
+Internally this dependency injection uses [`Proxy`][proxy], which some may frown upon due to the overhead of invoking meta traps. However, I have taken note of this and wrote the library to balance convenience with performance by optionally [_memoizing_][memoize] each property accessor by default. Not sure what I mean? Here's an example:
 
 ```js
 const stringInject = createInjector((prop) => {
@@ -149,8 +183,12 @@ Available under the MIT License
 [codecov-url]: https://codecov.io/gh/patrickroberts/di-proxy
 [codecov-image]: https://codecov.io/gh/patrickroberts/di-proxy/branch/master/graph/badge.svg
 
+[code-style-url]: https://standardjs.com/
+[code-style-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
+
 [jquery-demo]: https://jsfiddle.net/patrob10114/zhdj6jgb/
 [query-selector-demo]: https://jsfiddle.net/patrob10114/jbu5tm1j/
+[session-storage-demo]: https://jsfiddle.net/patrob10114/3yb8a5u4/
 
 [proxy]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
 [memoize]: https://en.wikipedia.org/wiki/Memoization

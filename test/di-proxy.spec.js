@@ -12,13 +12,13 @@ describe('di-proxy', () => {
       expect(createInjector(() => {})).to.be.a('function')
     })
 
-    it('should return a function that will throw if its argument is not a function', () => {
+    it('should return a function that throws if its argument is not a function', () => {
       const inject = createInjector(() => {})
 
       expect(() => inject()).to.throw(TypeError, 'is not a function')
     })
 
-    it('should return a function that will return a function', () => {
+    it('should return a function that returns a function', () => {
       expect(createInjector(() => {})(() => {})).to.be.a('function')
     })
 
@@ -42,51 +42,104 @@ describe('di-proxy', () => {
       })
     })
 
-    it('should memoize injectors with function parameter as key', () => {
-      const fakeRequire = () => {}
+    describe('createInjector(..., noCache = false)', () => {
+      it('should memoize injectors with function parameter as key', () => {
+        const fakeRequire = () => {}
 
-      expect(createInjector(fakeRequire)).to.equal(createInjector(fakeRequire))
+        expect(createInjector(fakeRequire)).to.equal(createInjector(fakeRequire))
+      })
+
+      it('should memoize resolved values per require function', () => {
+        let timesCalled = 0
+        const fakeRequire1 = () => ++timesCalled
+        const fakeRequire2 = () => ++timesCalled
+        const inject1 = createInjector(fakeRequire1)
+        const inject2 = createInjector(fakeRequire2)
+
+        inject1((proxy1) => {
+          expect(proxy1.prop1).to.equal(1)
+          expect(proxy1.prop2).to.equal(2)
+          // repeat to ensure proxy objects resolve repeated
+          // property accesses without invoking get trap
+          expect(proxy1.prop1).to.equal(1)
+        })()
+
+        inject2((proxy2) => {
+          expect(proxy2.prop1).to.equal(3)
+          expect(proxy2.prop2).to.equal(4)
+          // repeat to ensure proxy objects resolve repeated
+          // property accesses without invoking get trap
+          expect(proxy2.prop1).to.equal(3)
+        })()
+
+        // repeat to ensure injectors resolve repeated
+        // property accesses without invoking get trap
+
+        inject1((proxy1) => {
+          expect(proxy1.prop1).to.equal(1)
+          expect(proxy1.prop2).to.equal(2)
+        })()
+
+        inject2((proxy2) => {
+          expect(proxy2.prop1).to.equal(3)
+          expect(proxy2.prop2).to.equal(4)
+        })()
+
+        // make sure get trap was not invoked more than once
+        // per unique property access per require function
+        expect(timesCalled).to.equal(4)
+      })
     })
 
-    it('should memoize resolved dependencies per require function with property name as key', () => {
-      let timesCalled = 0
-      const fakeRequire1 = () => ++timesCalled
-      const fakeRequire2 = () => ++timesCalled
-      const inject1 = createInjector(fakeRequire1)
-      const inject2 = createInjector(fakeRequire2)
+    describe('createInjector(..., noCache = true)', () => {
+      it('should not memoize injectors with function parameter as key', () => {
+        const fakeRequire = () => {}
 
-      inject1((proxy1) => {
-        expect(proxy1.prop1).to.equal(1)
-        expect(proxy1.prop2).to.equal(2)
-        // repeat to ensure proxy objects resolve repeated
+        expect(createInjector(fakeRequire)).to.not.equal(createInjector(fakeRequire, true))
+      })
+
+      it('should not memoize resolved values per require function', () => {
+        let timesCalled = 0
+        const fakeRequire = () => ++timesCalled
+        const inject1 = createInjector(fakeRequire)
+        const inject2 = createInjector(fakeRequire, true)
+
+        inject1((proxy1) => {
+          expect(proxy1.prop1).to.equal(1)
+          expect(proxy1.prop2).to.equal(2)
+          // repeat to ensure proxy objects resolve repeated
+          // property accesses without invoking get trap
+          expect(proxy1.prop1).to.equal(1)
+        })()
+
+        inject2((proxy2) => {
+          expect(proxy2.prop1).to.equal(3)
+          expect(proxy2.prop2).to.equal(4)
+          // repeat to ensure proxy objects resolve repeated
+          // property accesses by invoking get trap
+          expect(proxy2.prop1).to.equal(5)
+        })()
+
+        // repeat to ensure injectors resolve repeated
         // property accesses without invoking get trap
-        expect(proxy1.prop1).to.equal(1)
-      })()
 
-      inject2((proxy2) => {
-        expect(proxy2.prop1).to.equal(3)
-        expect(proxy2.prop2).to.equal(4)
-        // repeat to ensure proxy objects resolve repeated
-        // property accesses without invoking get trap
-        expect(proxy2.prop1).to.equal(3)
-      })()
+        inject1((proxy1) => {
+          expect(proxy1.prop1).to.equal(1)
+          expect(proxy1.prop2).to.equal(2)
+        })()
 
-      // repeat to ensure injectors resolve repeated
-      // property accesses without invoking get trap
+        // repeat to ensure injectors resolve repeated
+        // property accesses by invoking get trap
 
-      inject1((proxy1) => {
-        expect(proxy1.prop1).to.equal(1)
-        expect(proxy1.prop2).to.equal(2)
-      })()
+        inject2((proxy2) => {
+          expect(proxy2.prop1).to.equal(6)
+          expect(proxy2.prop2).to.equal(7)
+        })()
 
-      inject2((proxy2) => {
-        expect(proxy2.prop1).to.equal(3)
-        expect(proxy2.prop2).to.equal(4)
-      })()
-
-      // make sure get trap was not invoked more than once
-      // per unique property access per require function
-      expect(timesCalled).to.equal(4)
+        // make sure get trap was invoked more than once
+        // per unique property access for inject2()
+        expect(timesCalled).to.equal(7)
+      })
     })
   })
 })
