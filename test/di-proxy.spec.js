@@ -1,145 +1,136 @@
 /* eslint-env mocha */
 const { expect } = require('chai')
-const createInjector = require('../es6')
+const { inject, wrap } = require('../es6')
 
 describe('di-proxy', () => {
-  describe('createInjector()', () => {
-    it('should throw if argument is not a function', () => {
-      expect(() => createInjector()).to.throw(TypeError, 'is not a function')
-    })
-
-    it('should return a function', () => {
-      expect(createInjector(() => {})).to.be.a('function')
-    })
-
-    it('should return a function that throws if its argument is not a function', () => {
-      const inject = createInjector(() => {})
-
+  describe('inject(resolver)', () => {
+    it('throws if resolver is not a function', () => {
       expect(() => inject()).to.throw(TypeError, 'is not a function')
     })
 
-    it('should return a function that returns a function', () => {
-      expect(createInjector(() => {})(() => {})).to.be.a('function')
+    it('returns an object', () => {
+      expect(inject(() => {})).to.be.an('object')
     })
 
-    it('should call function parameter in the get trap', () => {
+    it('invokes resolver from get trap', () => {
+      /* eslint no-unused-expressions: off */
+
       let called = false
-      const fakeRequire = (propertyName) => (called = true)
-      const inject = createInjector(fakeRequire)
+
+      const fakeResolver = () => { called = true }
+      const proxy = inject(fakeResolver)
 
       expect(called).to.equal(false)
 
-      inject(({ invokeTrap }) => {})()
+      proxy.somePropertyName
 
       expect(called).to.equal(true)
     })
 
-    it('should resolve get trap with return value from function parameter', () => {
-      const fakeRequire = (propertyName) => propertyName
+    it('returns result of invoking resolver from get trap', () => {
+      const fakeResolver = (propertyName) => propertyName
 
-      createInjector(fakeRequire)(({ prop }) => {
-        expect(prop).to.equal('prop')
-      })
+      let key = String(Math.random())
+
+      expect(inject(fakeResolver)[key]).to.equal(key)
+    })
+  })
+
+  describe('inject(..., memoize = true)', () => {
+    it('memoizes property accesses per resolver', () => {
+      let timesCalled = 0
+
+      const fakeResolver = () => ++timesCalled
+
+      // default behavior memoizes
+      const proxy = inject(fakeResolver)
+
+      expect(proxy.prop1).to.equal(1)
+      expect(proxy.prop2).to.equal(2)
+      // repeat to ensure proxy resolves repeated
+      // property accesses without invoking get trap
+      expect(proxy.prop1).to.equal(1)
+
+      // make sure get trap was not invoked more
+      // than once per unique property access
+      expect(timesCalled).to.equal(2)
+    })
+  })
+
+  describe('inject(..., memoize = false)', () => {
+    it('does not memoize property accesses', () => {
+      let timesCalled = 0
+
+      const fakeResolver = () => ++timesCalled
+
+      const proxy = inject(fakeResolver, false)
+
+      expect(proxy.prop1).to.equal(1)
+      expect(proxy.prop2).to.equal(2)
+      // repeat to ensure proxy resolves repeated
+      // property accesses by invoking get trap
+      expect(proxy.prop1).to.equal(3)
+
+      // make sure get trap was invoked more
+      // than once per unique property access
+      expect(timesCalled).to.equal(3)
+    })
+  })
+
+  describe('wrap()', () => {
+    it('throws if resolver is not a function', () => {
+      expect(() => wrap()).to.throw(TypeError, 'is not a function')
     })
 
-    describe('createInjector(..., noCache = false)', () => {
-      it('should memoize injectors with function parameter as key', () => {
-        const fakeRequire = () => {}
-
-        expect(createInjector(fakeRequire)).to.equal(createInjector(fakeRequire))
-      })
-
-      it('should memoize resolved values per require function', () => {
-        let timesCalled = 0
-        const fakeRequire1 = () => ++timesCalled
-        const fakeRequire2 = () => ++timesCalled
-        const inject1 = createInjector(fakeRequire1)
-        const inject2 = createInjector(fakeRequire2)
-
-        inject1((proxy1) => {
-          expect(proxy1.prop1).to.equal(1)
-          expect(proxy1.prop2).to.equal(2)
-          // repeat to ensure proxy objects resolve repeated
-          // property accesses without invoking get trap
-          expect(proxy1.prop1).to.equal(1)
-        })()
-
-        inject2((proxy2) => {
-          expect(proxy2.prop1).to.equal(3)
-          expect(proxy2.prop2).to.equal(4)
-          // repeat to ensure proxy objects resolve repeated
-          // property accesses without invoking get trap
-          expect(proxy2.prop1).to.equal(3)
-        })()
-
-        // repeat to ensure injectors resolve repeated
-        // property accesses without invoking get trap
-
-        inject1((proxy1) => {
-          expect(proxy1.prop1).to.equal(1)
-          expect(proxy1.prop2).to.equal(2)
-        })()
-
-        inject2((proxy2) => {
-          expect(proxy2.prop1).to.equal(3)
-          expect(proxy2.prop2).to.equal(4)
-        })()
-
-        // make sure get trap was not invoked more than once
-        // per unique property access per require function
-        expect(timesCalled).to.equal(4)
-      })
+    it('throws if callback is not a function', () => {
+      expect(() => wrap(() => {})).to.throw(TypeError, 'is not a function')
     })
 
-    describe('createInjector(..., noCache = true)', () => {
-      it('should not memoize injectors with function parameter as key', () => {
-        const fakeRequire = () => {}
+    it('returns a function', () => {
+      expect(wrap(() => {}, () => {})).to.be.a('function')
+    })
 
-        expect(createInjector(fakeRequire)).to.not.equal(createInjector(fakeRequire, true))
-      })
+    it('invokes callback from returned function', () => {
+      let called = false
 
-      it('should not memoize resolved values per require function', () => {
-        let timesCalled = 0
-        const fakeRequire = () => ++timesCalled
-        const inject1 = createInjector(fakeRequire)
-        const inject2 = createInjector(fakeRequire, true)
+      const fakeCallback = () => { called = true }
+      const injector = wrap(() => {}, fakeCallback)
 
-        inject1((proxy1) => {
-          expect(proxy1.prop1).to.equal(1)
-          expect(proxy1.prop2).to.equal(2)
-          // repeat to ensure proxy objects resolve repeated
-          // property accesses without invoking get trap
-          expect(proxy1.prop1).to.equal(1)
-        })()
+      expect(called).to.equal(false)
 
-        inject2((proxy2) => {
-          expect(proxy2.prop1).to.equal(3)
-          expect(proxy2.prop2).to.equal(4)
-          // repeat to ensure proxy objects resolve repeated
-          // property accesses by invoking get trap
-          expect(proxy2.prop1).to.equal(5)
-        })()
+      injector()
 
-        // repeat to ensure injectors resolve repeated
-        // property accesses without invoking get trap
+      expect(called).to.equal(true)
+    })
 
-        inject1((proxy1) => {
-          expect(proxy1.prop1).to.equal(1)
-          expect(proxy1.prop2).to.equal(2)
-        })()
+    it('invokes resolver if property of first argument in callback is accessed', () => {
+      let called = false
 
-        // repeat to ensure injectors resolve repeated
-        // property accesses by invoking get trap
+      const fakeResolver = () => { called = true }
+      const fakeCallback = (proxy) => {
+        /* eslint no-unused-expressions: off */
+        proxy.somePropertyName
+      }
 
-        inject2((proxy2) => {
-          expect(proxy2.prop1).to.equal(6)
-          expect(proxy2.prop2).to.equal(7)
-        })()
+      const injector = wrap(fakeResolver, fakeCallback)
 
-        // make sure get trap was invoked more than once
-        // per unique property access for inject2()
-        expect(timesCalled).to.equal(7)
-      })
+      expect(called).to.equal(false)
+
+      injector()
+
+      expect(called).to.equal(true)
+    })
+
+    it('passes parameters to callback after the first argument', () => {
+      const params = [{}, {}, {}]
+
+      function fakeCallback (proxy, ...args) {
+        args.forEach((arg, index) => expect(arg).to.equal(params[index]))
+      }
+
+      const injector = wrap(() => {}, fakeCallback)
+
+      injector(...params)
     })
   })
 })

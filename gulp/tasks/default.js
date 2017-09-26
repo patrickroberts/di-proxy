@@ -1,3 +1,3 @@
 const gulp = require('gulp')
 
-gulp.task('default', ['babel'])
+gulp.task('default', ['babel', 'docs'])
