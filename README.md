@@ -38,8 +38,8 @@ const { inject, wrap } = require('di-proxy')
 ## inject(resolver, [memoize]) ⇒ [<code>Proxy</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
 Creates an optionally memoized proxy that invokes the resolver from trapped property accesses.
 
-**Kind**: global function
-**Returns**: [<code>Proxy</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) - proxy - A proxy with a get trap that invokes the resolver.
+**Kind**: global function  
+**Returns**: [<code>Proxy</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) - proxy - A proxy with a get trap that invokes the resolver.  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -49,8 +49,8 @@ Creates an optionally memoized proxy that invokes the resolver from trapped prop
 <a name="wrap"></a>
 
 ## wrap(resolver, callback) ⇒ [<code>injector</code>](#injector)
-**Kind**: global function
-**Returns**: [<code>injector</code>](#injector) - injector - A function that passes arguments after the proxy in callback when invoked.
+**Kind**: global function  
+**Returns**: [<code>injector</code>](#injector) - injector - A function that passes arguments after the proxy in callback when invoked.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -60,9 +60,9 @@ Creates an optionally memoized proxy that invokes the resolver from trapped prop
 <a name="resolver"></a>
 
 ## resolver ⇒ <code>\*</code>
-**Kind**: global typedef
-**Returns**: <code>\*</code> - result - Synchronously resolved object referenced by key.
-**See**: [`inject()`](#inject)
+**Kind**: global typedef  
+**Returns**: <code>\*</code> - result - Synchronously resolved object referenced by key.  
+**See**: [`inject()`](#inject)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -71,8 +71,8 @@ Creates an optionally memoized proxy that invokes the resolver from trapped prop
 <a name="callback"></a>
 
 ## callback ⇒ <code>\*</code>
-**Kind**: global typedef
-**See**: [`wrap()`](#wrap)
+**Kind**: global typedef  
+**See**: [`wrap()`](#wrap)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -82,9 +82,9 @@ Creates an optionally memoized proxy that invokes the resolver from trapped prop
 <a name="injector"></a>
 
 ## injector ⇒ <code>\*</code>
-**Kind**: global typedef
-**Returns**: <code>\*</code> - result - Result of invoking callback.
-**See**: [`wrap()`](#wrap)
+**Kind**: global typedef  
+**Returns**: <code>\*</code> - result - Result of invoking callback.  
+**See**: [`wrap()`](#wrap)  
 
 | Param | Type | Description |
 | --- | --- | --- |
