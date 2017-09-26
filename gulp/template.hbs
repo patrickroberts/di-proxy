@@ -70,13 +70,16 @@ $file.change(() => {
 [`document.querySelector`][query-selector-demo]:
 
 ```js
-const qs = diProxy.wrap(document.querySelector.bind(document))
+const qs = diProxy.wrap(
+  document.querySelector.bind(document),
+  ({ input: { id, name, type, value }, pre }) => {
+    const json = JSON.stringify({ id, name, type, value })
 
-qs(({ input: { id, name, type, value }, pre }) => {
-  const json = JSON.stringify({ id, name, type, value })
+    pre.appendChild(document.createTextNode(json))
+  }
+)
 
-  pre.appendChild(document.createTextNode(json))
-})
+qs()
 ```
 
 [`sessionStorage.getItem`][session-storage-demo]:
