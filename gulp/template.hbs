@@ -105,7 +105,7 @@ All modern browsers including Microsoft Edge, and Node.js `>=6.0.0` are supporte
 
 ## Some Notes on Performance
 
-Internally this dependency injection uses [`Proxy`][proxy]. However, any performance implications have been mitigated by optionally [_memoizing_][memoiziation] each property accessor by default:
+Internally this dependency injection uses [`Proxy`][proxy]. However, any performance implications have been mitigated by optionally [_memoizing_][memoization] each property accessor by default:
 
 ```js
 const string = diProxy.inject((prop) => {
